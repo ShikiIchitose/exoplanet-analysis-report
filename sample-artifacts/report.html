@@ -1,0 +1,185 @@
+<h1>Exoplanet Method Comparison Report</h1>
+<h2>1. One-line takeaway</h2>
+<ul>
+<li>(Write 1–2 sentences that summarize the major differences seen in this snapshot.)</li>
+</ul>
+<h2>2. Run metadata</h2>
+<ul>
+<li>Generated (UTC): <strong>2026-02-18T10:38:17Z</strong></li>
+<li>Git commit: <strong>ref: re</strong></li>
+<li>Source table: <code>pscomppars</code></li>
+<li>Rows: raw <strong>6025</strong> / clean <strong>6025</strong></li>
+<li>Baseline method: <strong>Transit</strong></li>
+<li>Bootstrap: seed <strong>18790314</strong>, resamples <strong>10000</strong>, CI <strong>0.95</strong>
+<ul>
+<li>Quantile method: <strong>linear</strong></li>
+<li>CI eligibility threshold: <strong>n_nonnull ≥ 20</strong></li>
+</ul>
+</li>
+</ul>
+<h2>3. Data source</h2>
+<ul>
+<li>NASA Exoplanet Archive (TAP)</li>
+<li>Why <code>pscomppars</code>: one row per planet → convenient for method-wise summaries.</li>
+<li>Caveat: <code>pscomppars</code> is a composite table; values may be derived/filled from different references and may be <strong>not self-consistent within a row</strong>.</li>
+</ul>
+<h2>4. Data contract</h2>
+<ul>
+<li>Raw snapshot: <code>data/raw/pscomppars_20260218T103817Z.parquet</code></li>
+<li>Clean dataset: <code>data/clean/pscomppars_clean_20260218T103817Z.parquet</code></li>
+<li>Warehouse: <code>warehouse/warehouse.duckdb</code></li>
+<li>Columns used:
+<ul>
+<li><code>pl_name</code></li>
+<li><code>discoverymethod</code></li>
+<li><code>disc_year</code></li>
+<li><code>pl_rade</code></li>
+<li><code>pl_orbper</code></li>
+<li><code>pl_bmasse</code></li>
+<li><code>pl_bmassprov</code></li>
+</ul>
+</li>
+</ul>
+<h2>5. Cleaning &amp; validation</h2>
+<ul>
+<li>Rows are <strong>not dropped</strong> solely because a metric is null.</li>
+<li>For each metric: enforce <code>metric &gt; 0</code> only where metric is not null.</li>
+<li><code>disc_year</code> is descriptive only; invalid values become null.</li>
+</ul>
+<h2>6. Missingness (per metric × method)</h2>
+<h3>pl_rade</h3>
+<p>| Method | n_total | n_nonnull | missing_rate |
+| --- | --- | --- | --- |
+| Transit | 4501 | 4500 | 0.0002222 |
+| Radial Velocity | 1166 | 1129 | 0.03173 |
+| Imaging | 92 | 88 | 0.04348 |
+| Microlensing | 266 | 266 | 0 |</p>
+<h3>pl_orbper</h3>
+<p>| Method | n_total | n_nonnull | missing_rate |
+| --- | --- | --- | --- |
+| Transit | 4501 | 4501 | 0 |
+| Radial Velocity | 1166 | 1166 | 0 |
+| Imaging | 92 | 25 | 0.7283 |
+| Microlensing | 266 | 12 | 0.9549 |</p>
+<h3>pl_bmasse</h3>
+<p>| Method | n_total | n_nonnull | missing_rate |
+| --- | --- | --- | --- |
+| Transit | 4501 | 4478 | 0.00511 |
+| Radial Velocity | 1166 | 1165 | 0.0008576 |
+| Imaging | 92 | 89 | 0.03261 |
+| Microlensing | 266 | 266 | 0 |</p>
+<ul>
+<li>Note: missingness may be non-random and can bias comparisons.</li>
+</ul>
+<h2>7. Exploratory analysis</h2>
+<ul>
+<li>Figures (see <code>artifacts/figures/</code>):
+<ul>
+<li><code>figures/method_counts.png</code></li>
+<li><code>figures/missingness_heatmap.png</code></li>
+<li><code>figures/pl_rade_by_method.png</code></li>
+<li><code>figures/pl_orbper_by_method.png</code></li>
+<li><code>figures/pl_bmasse_by_method.png</code></li>
+</ul>
+</li>
+</ul>
+<h2>8. Statistical analysis</h2>
+<ul>
+<li>Primary summaries: quantiles (p05/p25/p50/p75/p95) on non-null values.</li>
+<li>Diagnostics: mean/std/min/max (non-null only).</li>
+<li>Δ(m) = median(metric|m) − median(metric|baseline).</li>
+<li>Bootstrap percentile interval is computed only when <code>n_nonnull</code> is sufficient.</li>
+</ul>
+<h2>9. Results</h2>
+<ul>
+<li>Footnotes:
+<ul>
+<li>Mean/std are sensitive to heavy tails and outliers; primary comparisons use medians/quantiles.</li>
+<li>For small <code>n_nonnull</code>, tail quantiles (p05/p95) can behave like min/max; interpret cautiously.</li>
+</ul>
+</li>
+</ul>
+<h3>pl_rade — Quantiles (primary)</h3>
+<p>| Method | n_nonnull | p05 | p25 | p50 | p75 | p95 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Transit | 4500 | 1.01 | 1.62 | 2.43 | 3.97 | 14.87 |
+| Radial Velocity | 1129 | 1.533 | 4.12 | 12.6 | 13.4 | 14.1 |
+| Imaging | 88 | 11.9 | 12.2 | 12.4 | 14.01 | 28.3 |
+| Microlensing | 266 | 1.828 | 4.86 | 12.4 | 13.5 | 14.1 |</p>
+<h3>pl_rade — Diagnostics</h3>
+<p>| Method | mean | std | min | max |
+| --- | --- | --- | --- | --- |
+| Transit | 4.368 | 4.596 | 0.3098 | 32.6 |
+| Radial Velocity | 9.76 | 4.78 | 0.637 | 15.58 |
+| Imaging | 15.61 | 11.05 | 10.47 | 87.21 |
+| Microlensing | 9.851 | 4.535 | 1.09 | 14.3 |</p>
+<h3>pl_rade — Difference vs baseline</h3>
+<p>| Method | point (median diff) | CI |
+| --- | --- | --- |
+| Radial Velocity | 10.17 | [10.03, 10.28] |
+| Imaging | 9.97 | [9.86, 10.2] |
+| Microlensing | 9.97 | [9.63, 10.46] |</p>
+<hr />
+<h3>pl_orbper — Quantiles (primary)</h3>
+<p>| Method | n_nonnull | p05 | p25 | p50 | p75 | p95 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Transit | 4501 | 1.367 | 3.833 | 8.159 | 19.5 | 88.07 |
+| Radial Velocity | 1166 | 3.663 | 21.81 | 298.9 | 1116 | 7781 |
+| Imaging | 25 | 3772 | 9697 | 3.3e+04 | 1.17e+05 | 7.892e+06 |
+| Microlensing | 12 | 1533 | 2413 | 3142 | 4757 | 9404 |</p>
+<h3>pl_orbper — Diagnostics</h3>
+<p>| Method | mean | std | min | max |
+| --- | --- | --- | --- | --- |
+| Transit | 23.97 | 80.99 | 0.112 | 3650 |
+| Radial Velocity | 1754 | 5246 | 0.7365 | 7.711e+04 |
+| Imaging | 1.703e+07 | 8.024e+07 | 2090 | 4.02e+08 |
+| Microlensing | 4176 | 3424 | 1220 | 1.42e+04 |</p>
+<h3>pl_orbper — Difference vs baseline</h3>
+<p>| Method | point (median diff) | CI |
+| --- | --- | --- |
+| Radial Velocity | 290.7 | [229.6, 363.2] |
+| Imaging | 3.299e+04 | [1.003e+04, 1.041e+05] |
+| Microlensing | 3134 | N/A (insufficient n) |</p>
+<hr />
+<h3>pl_bmasse — Quantiles (primary)</h3>
+<p>| Method | n_nonnull | p05 | p25 | p50 | p75 | p95 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Transit | 4478 | 1.08 | 3.39 | 6.845 | 19.75 | 597.6 |
+| Radial Velocity | 1165 | 3.497 | 17.16 | 346.4 | 1367 | 4475 |
+| Imaging | 89 | 1271 | 2860 | 4132 | 6356 | 8772 |
+| Microlensing | 266 | 3.99 | 21 | 170.5 | 834.5 | 4215 |</p>
+<h3>pl_bmasse — Diagnostics</h3>
+<p>| Method | mean | std | min | max |
+| --- | --- | --- | --- | --- |
+| Transit | 123.5 | 500.9 | 0.0364 | 8899 |
+| Radial Velocity | 1035 | 1625 | 0.193 | 9333 |
+| Imaging | 4456 | 2230 | 635.7 | 9535 |
+| Microlensing | 797.7 | 1560 | 1.32 | 9217 |</p>
+<h3>pl_bmasse — Difference vs baseline</h3>
+<p>| Method | point (median diff) | CI |
+| --- | --- | --- |
+| Radial Velocity | 339.6 | [269.7, 393.7] |
+| Imaging | 4125 | [3489, 4570] |
+| Microlensing | 163.7 | [110.6, 229] |</p>
+<hr />
+<h2>10. Interpretation</h2>
+<ul>
+<li>Interpret differences as descriptive selection/detection effects; no causal claims.</li>
+</ul>
+<h2>11. Limitations</h2>
+<ul>
+<li>Composite table caveat (<code>pscomppars</code> not necessarily self-consistent).</li>
+<li>Missingness can be non-random across methods.</li>
+<li>Group imbalance → larger uncertainty, especially for small-n methods/metrics.</li>
+</ul>
+<h2>12. How to reproduce</h2>
+<pre><code class="language-bash">uv sync --locked
+uv run python scripts/run_pipeline.py
+</code></pre>
+<h2>13. Appendix</h2>
+<h3>A. Full ADQL</h3>
+<pre><code class="language-sql">select pl_name, discoverymethod, disc_year, pl_rade, pl_orbper, pl_bmasse, pl_bmassprov from pscomppars where discoverymethod in ('Transit', 'Radial Velocity', 'Imaging', 'Microlensing')
+</code></pre>
+<h3>B. TAP sync URL (CSV)</h3>
+<pre><code class="language-text">https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+pl_name%2C+discoverymethod%2C+disc_year%2C+pl_rade%2C+pl_orbper%2C+pl_bmasse%2C+pl_bmassprov+from+pscomppars+where+discoverymethod+in+%28%27Transit%27%2C+%27Radial+Velocity%27%2C+%27Imaging%27%2C+%27Microlensing%27%29&amp;format=csv
+</code></pre>

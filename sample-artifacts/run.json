@@ -1,0 +1,150 @@
+{
+  "generated_utc": "2026-02-18T10:38:17Z",
+  "git_commit": "ref: re",
+  "python": {
+    "version": "3.13.12"
+  },
+  "command": "uv run python scripts/run_pipeline.py",
+  "data_source": {
+    "name": "NASA Exoplanet Archive",
+    "table": "pscomppars",
+    "tap_endpoint": "https://exoplanetarchive.ipac.caltech.edu/TAP",
+    "tap_mode": "sync",
+    "format": "csv",
+    "adql": "select pl_name, discoverymethod, disc_year, pl_rade, pl_orbper, pl_bmasse, pl_bmassprov from pscomppars where discoverymethod in ('Transit', 'Radial Velocity', 'Imaging', 'Microlensing')",
+    "url": "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+pl_name%2C+discoverymethod%2C+disc_year%2C+pl_rade%2C+pl_orbper%2C+pl_bmasse%2C+pl_bmassprov+from+pscomppars+where+discoverymethod+in+%28%27Transit%27%2C+%27Radial+Velocity%27%2C+%27Imaging%27%2C+%27Microlensing%27%29&format=csv"
+  },
+  "http": {
+    "status": 200,
+    "content_type": "text/plain; charset=UTF-8",
+    "response_bytes": 488846
+  },
+  "filters": {
+    "discoverymethod_in": [
+      "Transit",
+      "Radial Velocity",
+      "Imaging",
+      "Microlensing"
+    ]
+  },
+  "columns": {
+    "used": [
+      "pl_name",
+      "discoverymethod",
+      "disc_year",
+      "pl_rade",
+      "pl_orbper",
+      "pl_bmasse",
+      "pl_bmassprov"
+    ]
+  },
+  "row_counts": {
+    "raw": 6025,
+    "clean": 6025
+  },
+  "schema_hash": "sha256:fe93da84fc8458f9b99b1f2fb185564795d0f10258e84d1fa3a9f74ff7fcddf1",
+  "bootstrap": {
+    "seed": 18790314,
+    "n_resamples": 10000,
+    "ci": 0.95,
+    "baseline_method": "Transit",
+    "quantile_method": "linear",
+    "min_group_size_for_ci": 20,
+    "std_ddof": 1
+  },
+  "snapshots": {
+    "raw_parquet_path": "data/raw/pscomppars_20260218T103817Z.parquet",
+    "raw_sha256": "sha256:6765b10a2011b758985957db8c8b973cb5cc921d378307b64eec69d002c5e84b",
+    "clean_parquet_path": "data/clean/pscomppars_clean_20260218T103817Z.parquet",
+    "clean_sha256": "sha256:2b17ce3c9c00059d389bded1372f77e7774a213a8fb8e6bf0c072cbe8574eebd"
+  },
+  "missingness": {
+    "Transit": {
+      "pl_rade": {
+        "n_total": 4501,
+        "n_nonnull": 4500,
+        "missing_rate": 0.00022217285047765323
+      },
+      "pl_orbper": {
+        "n_total": 4501,
+        "n_nonnull": 4501,
+        "missing_rate": 0.0
+      },
+      "pl_bmasse": {
+        "n_total": 4501,
+        "n_nonnull": 4478,
+        "missing_rate": 0.005109975560986468
+      }
+    },
+    "Radial Velocity": {
+      "pl_rade": {
+        "n_total": 1166,
+        "n_nonnull": 1129,
+        "missing_rate": 0.03173241852487141
+      },
+      "pl_orbper": {
+        "n_total": 1166,
+        "n_nonnull": 1166,
+        "missing_rate": 0.0
+      },
+      "pl_bmasse": {
+        "n_total": 1166,
+        "n_nonnull": 1165,
+        "missing_rate": 0.0008576329331045907
+      }
+    },
+    "Imaging": {
+      "pl_rade": {
+        "n_total": 92,
+        "n_nonnull": 88,
+        "missing_rate": 0.04347826086956519
+      },
+      "pl_orbper": {
+        "n_total": 92,
+        "n_nonnull": 25,
+        "missing_rate": 0.7282608695652174
+      },
+      "pl_bmasse": {
+        "n_total": 92,
+        "n_nonnull": 89,
+        "missing_rate": 0.03260869565217395
+      }
+    },
+    "Microlensing": {
+      "pl_rade": {
+        "n_total": 266,
+        "n_nonnull": 266,
+        "missing_rate": 0.0
+      },
+      "pl_orbper": {
+        "n_total": 266,
+        "n_nonnull": 12,
+        "missing_rate": 0.9548872180451128
+      },
+      "pl_bmasse": {
+        "n_total": 266,
+        "n_nonnull": 266,
+        "missing_rate": 0.0
+      }
+    }
+  },
+  "outputs": {
+    "uv_lock_sha256": "sha256:f144af61f68bb52aba54ae628a4c4dbf5a63949c914186225cb79f1caf131314",
+    "report_md": "artifacts/report.md",
+    "report_html": "artifacts/report.html",
+    "metrics_json": "artifacts/metrics.json",
+    "figures_dir": "artifacts/figures/",
+    "warehouse": "warehouse/warehouse.duckdb"
+  },
+  "libraries": {
+    "numpy": "2.4.2",
+    "pandas": "3.0.0",
+    "pyarrow": "23.0.0",
+    "duckdb": "1.4.4",
+    "httpx": "0.28.1",
+    "matplotlib": "3.10.8",
+    "markdown-it-py": "4.0.0"
+  },
+  "status": "success",
+  "error_summary": null
+}
