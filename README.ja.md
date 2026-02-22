@@ -170,25 +170,25 @@ list = ["Transit", "Radial Velocity", "Imaging", "Microlensing"]
 - $m$ を discovery method（検出法）、$b$ を baseline method（基準となる検出法）とします。
 - metric $k$ について、観測された（non-null の）サンプルを次で表します。
 
-  $$
+```math
   x_{m,k} = \{x_{m,k,1}, \dots, x_{m,k,n_{m,k}}\}
   \qquad (1)
-  $$
+```
 
-  $$
+```math
   x_{b,k} = \{x_{b,k,1}, \dots, x_{b,k,n_{b,k}}\}
   \qquad (2)
-  $$
+```
 
 - $n_{total}(m)$ は method $m$ に属する行数の総数（metric $k$ の null を含む）です。
 - $n_{nonnull}(m,k)=n_{m,k}$ は method $m$ における metric $k$ の non-null 行数です。
 - 欠損率（missing rate）は次で定義します。
 
-  $$
+```math
   r_{m,k} = 1 - \frac{n_{m,k}}{n_{\text{total}}(m)}
   \quad (n_{\text{total}}(m) > 0)
   \qquad (3)
-  $$
+```
 
 ## 要約統計（method 別）
 
@@ -196,31 +196,31 @@ list = ["Transit", "Radial Velocity", "Imaging", "Microlensing"]
 
 - 最小値／最大値と平均：
 
-  $$
+```math
   \min(x_{m,k}), \ \max(x_{m,k}), \
   \overline{x}_{m,k} = \frac{1}{n_{m,k}}\sum_{i=1}^{n_{m,k}} x_{m,k,i}
   \qquad (4)
-  $$
+```
 
 - 分位点（quantile: 分位点） 5/25/50/75/95%：
 
-  $$
+```math
   q_{p}(x_{m,k})
   \ \text{for}\ p \in \{0.05, 0.25, 0.50, 0.75, 0.95\}
   \qquad (5)
-  $$
+```
 
   分位点は再現性のため、固定の `quantile_method`（既定: `"linear"`）を用いて  
   `numpy.quantile(..., method=quantile_method)` により計算します。
 
 - 標準偏差（standard deviation: 標準偏差） `ddof` 付き：
 
-  $$
+```math
   s_{m,k} =
   \sqrt{\frac{1}{n_{m,k}-\text{ddof}}
   \sum_{i=1}^{n_{m,k}} (x_{m,k,i}-\overline{x}_{m,k})^2 }
   \qquad (6)
-  $$
+```
 
   $n_{m,k} = 0$ または $n_{m,k} \le \text{ddof}$ の場合、`std` は `null` として報告します。
 
@@ -228,11 +228,11 @@ list = ["Transit", "Radial Velocity", "Imaging", "Microlensing"]
 
 baseline 以外の method $m \ne b$ について、主要な効果量は median（中央値）の差です。
 
-$$
+```math
 \widehat{\Delta}_{m,k}
-= \operatorname{median}(x_{m,k}) - \operatorname{median}(x_{b,k})
+= \mathrm{median}(x_{m,k}) - \mathrm{median}(x_{b,k})
 \qquad (7)
-$$
+```
 
 値が正であれば、metric $k$ について method $m$ の分布が baseline よりも **典型値（中央値）が大きい傾向** にあることを示します（単位は metric の units）。
 
@@ -243,43 +243,43 @@ $$
 
 1. 各グループ内で、元標本と同じサイズで復元抽出（sampling with replacement）します：
 
-   $$
+```math
    I^{(j)}_{m,1},\dots,I^{(j)}_{m,n_m} \overset{\text{iid}}{\sim} \mathrm{Unif}\{0,\dots,n_m-1\},
    \quad
    x^{*(j)}_{m,k} = (x_{m,k,I^{(j)}_{m,1}},\dots,x_{m,k,I^{(j)}_{m,n_m}})
    \qquad (8)
-   $$
+```
 
-   $$
+```math
    I^{(j)}_{b,1},\dots,I^{(j)}_{b,n_b} \overset{\text{iid}}{\sim} \mathrm{Unif}\{0,\dots,n_b-1\},
    \quad
    x^{*(j)}_{b,k} = (x_{b,k,I^{(j)}_{b,1}},\dots,x_{b,k,I^{(j)}_{b,n_b}})
    \qquad (9)
-   $$
+```
 
 2. 反復 $j$ における中央値差を計算します：
 
-   $$
+```math
    \Delta^{*(j)}_{m,k}
    =
-   \operatorname{median}(x^{*(j)}_{m,k})
+   \mathrm{median}(x^{*(j)}_{m,k})
    -
-   \operatorname{median}(x^{*(j)}_{b,k})
+   \mathrm{median}(x^{*(j)}_{b,k})
    \qquad (10)
-   $$
+```
 
-ブートストラップ複製 $S=\{\Delta^{*(j)}_{m,k}\}_{j=1}^{B}$ を考え、$S$ を昇順に並べたものを
+ブートストラップ複製 $`S=\{\Delta^{*(j)}_{m,k}\}_{j=1}^{B}`$ を考え、 $S$ を昇順に並べたものを
 $y_0 \le \dots \le y_{B-1}$ とします。`quantile_method="linear"` の場合、経験的な $p$ 分位点 $Q_p(S)$ は線形補間により次で定義します：
 
-$$
+```math
 h = p(B-1),\quad j=\lfloor h \rfloor,\quad g=h-j,\quad
 Q_p(S) = (1-g)\,y_j + g\,y_{j+1}
 \qquad (11)
-$$
+```
 
 信頼水準 $ci$（例：0.95）および $\alpha = 1 - ci$ に対して、両側 quantile 区間は：
 
-$$
+```math
 \text{CI}_{m,k}
 =
 \left[
@@ -288,9 +288,9 @@ Q_{\alpha/2}(S),
 Q_{1-\alpha/2}(S)
 \right]
 \qquad (12)
-$$
+```
 
-実装では、`numpy.quantile(diffs, 100*p, method=quantile_method)` により $Q_p$ を計算し、
+実装では、`numpy.quantile(diffs, p, method=quantile_method)` により $Q_p$ を計算し、
 再現性のため `quantile_method` を固定します。
 
 > 注（解釈／別規約）：`quantile_method="inverted_cdf"` の場合、$Q_p$ は経験 CDF の逆関数としての定義
@@ -301,12 +301,12 @@ $$
 
 点推定（式 (7)）は両群が空でない限り常に計算しますが、CI は次を満たす場合にのみ計算します。
 
-$$
+```math
 n_{m,k} \ge n_{\min}
 \ \text{and}\
 n_{b,k} \ge n_{\min}
 \qquad (13)
-$$
+```
 
 ここで $n_{min}$ は閾値（例: `min_group_size_for_ci`）です。  
 ゲートを満たさない場合、CI は `null` として出力し、`reason="insufficient_n"` を付与します。

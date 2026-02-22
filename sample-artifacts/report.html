@@ -1,7 +1,22 @@
 <h1>Exoplanet Method Comparison Report</h1>
 <h2>1. One-line takeaway</h2>
 <ul>
-<li>(Write 1–2 sentences that summarize the major differences seen in this snapshot.)</li>
+    <li>
+      <p>Using <strong>Transit</strong> as the baseline, non-Transit methods -Radial Velocity(RV), Imaging(Im), and Microlensing(Mi)- show strong selection effects.</p>
+      <ul>
+        <li>Median radius: Δmedian(pl_rade) ≈ <strong>+10 R⊕</strong>(all non-Transit methods)</li>
+        <li>Median mass: Δmedian(pl_bmasse) ≈ <strong>+340</strong>(RV) / <strong>+4.1×10³</strong>(Im) / <strong>+164 M⊕</strong>(Mi)</li>
+        <li>Median period: Δmedian(pl_orbper) ≈ <strong>+291 days</strong> (RV), <strong>+3.3×10⁴ days</strong> (Im)</li>
+        Note: Microlensing pl_orbper n_nonnull is insufficient for calculating CI
+      </ul>
+      <p lang="ja"><strong>Transit</strong> を基準 (baseline) にすると, 非 Transit 系の手法 (Radial Velocity(RV), Imaging(Im), and Microlensing(Mi)) は, 中央値差ベースで検出法ごとの選択バイアス (selection effects) が強く現れている.</p>
+      <ul>
+        <li>Median radius: Δmedian(pl_rade) ≈ <strong>+10 R⊕</strong>(非Transit全手法)</li>
+        <li>Median mass: Δmedian(pl_bmasse) ≈ <strong>+340</strong>(RV) / <strong>+4.1×10³</strong>(Im) / <strong>+164 M⊕</strong>(Mi)</li>
+        <li>Median period: Δmedian(pl_orbper) ≈ <strong>+291 days</strong> (RV), <strong>+3.3×10⁴ days</strong> (Im)</li>
+        補足: Microlensing(pl_orbper) は CI 算出閾値に満たず欠損.
+      </ul>
+    </li>
 </ul>
 <h2>2. Run metadata</h2>
 <ul>
