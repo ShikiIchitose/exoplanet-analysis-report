@@ -172,25 +172,25 @@ Let:
 - $m$ be a discovery method, and $b$ be the baseline method.
 - For a given metric $k$, let the observed (non-null) samples be:
   
-  $$
+```math
   x_{m,k} = \{x_{m,k,1}, \dots, x_{m,k,n_{m,k}}\}
   \qquad (1)
-  $$
+```
 
-  $$
+```math
   x_{b,k} = \{x_{b,k,1}, \dots, x_{b,k,n_{b,k}}\}
   \qquad (2)
-  $$
+```
 
 - $n_{total}(m)$ is the total number of rows for method $m$ (including nulls for $k$).
 - $n_{nonnull}(m,k)=n_{m,k}$ is the number of non-null rows for metric $k$ within method $m$.
 - Missing rate is:
 
-  $$
+```math
   r_{m,k} = 1 - \frac{n_{m,k}}{n_{\text{total}}(m)}
   \quad (n_{\text{total}}(m) > 0)
   \qquad (3)
-  $$
+```
 
 ## Summary statistics (by method)
 
@@ -198,31 +198,31 @@ For each $(m, k)$, the following are reported:
 
 - Min/max and mean:
 
-  $$
+```math
   \min(x_{m,k}), \ \max(x_{m,k}), \
   \overline{x}_{m,k} = \frac{1}{n_{m,k}}\sum_{i=1}^{n_{m,k}} x_{m,k,i}
   \qquad (4)
-  $$
+```
 
 - Quantiles at 5/25/50/75/95 percent:
 
-  $$
+```math
   q_{p}(x_{m,k})
   \ \text{for}\ p \in \{0.05, 0.25, 0.50, 0.75, 0.95\}
   \qquad (5)
-  $$
+```
 
   Quantiles use a fixed `quantile_method` (default: `"linear"`) passed to
   `numpy.quantile(..., method=quantile_method)` for reproducibility.
 
 - Standard deviation with configurable `ddof`:
 
-  $$
+```math
   s_{m,k} =
   \sqrt{\frac{1}{n_{m,k}-\text{ddof}}
   \sum_{i=1}^{n_{m,k}} (x_{m,k,i}-\overline{x}_{m,k})^2 }
   \qquad (6)
-  $$
+```
 
   If $n_{m,k} = 0$ or $n_{m,k} \le \text{ddof}$, `std` is reported as `null`.
 
@@ -230,11 +230,11 @@ For each $(m, k)$, the following are reported:
 
 For each non-baseline method $m \ne b$, the primary effect size is the difference in medians:
 
-$$
+```math
 \widehat{\Delta}_{m,k}
-= \operatorname{median}(x_{m,k}) - \operatorname{median}(x_{b,k})
+= \mathrm{median}(x_{m,k}) - \mathrm{median}(x_{b,k})
 \qquad (7)
-$$
+```
 
 A positive value indicates the method-$m$ distribution tends to have **larger typical values** than the baseline for metric $k$ (in the metric’s units).
 
@@ -245,55 +245,54 @@ For bootstrap replicate $j = 1,\dots,B$:
 
 1. Resample with replacement within each group (same sample size):
 
-   $$
+```math
    I^{(j)}_{m,1},\dots,I^{(j)}_{m,n_m} \overset{\text{iid}}{\sim} \mathrm{Unif}\{0,\dots,n_m-1\},
    \quad
    x^{*(j)}_{m,k} = (x_{m,k,I^{(j)}_{m,1}},\dots,x_{m,k,I^{(j)}_{m,n_m}})
    \qquad (8)
-   $$
+```
 
-   $$
+```math
    I^{(j)}_{b,1},\dots,I^{(j)}_{b,n_b} \overset{\text{iid}}{\sim} \mathrm{Unif}\{0,\dots,n_b-1\},
    \quad
    x^{*(j)}_{b,k} = (x_{b,k,I^{(j)}_{b,1}},\dots,x_{b,k,I^{(j)}_{b,n_b}})
    \qquad (9)
-   $$
+```
 
 2. Compute the replicate median difference:
 
-   $$
+```math
    \Delta^{*(j)}_{m,k}
    =
-   \operatorname{median}(x^{*(j)}_{m,k})
+   \mathrm{median}(x^{*(j)}_{m,k})
    -
-   \operatorname{median}(x^{*(j)}_{b,k})
+   \mathrm{median}(x^{*(j)}_{b,k})
    \qquad (10)
-   $$
+```
 
-Let $S=\{\Delta^{*(j)}_{m,k}\}_{j=1}^{B}$ be the bootstrap replicates, and let
+Let $`S=\{\Delta^{*(j)}_{m,k}\}_{j=1}^{B}`$ be the bootstrap replicates, and let
 $y_0 \le \dots \le y_{B-1}$ be $S$ sorted in ascending order.
 For `quantile_method="linear"`, define the empirical $p$-quantile $Q_p(S)$ by linear interpolation:
 
-$$
+```math
 h = p(B-1),\quad j=\lfloor h \rfloor,\quad g=h-j,\quad
 Q_p(S) = (1-g)\,y_j + g\,y_{j+1}
 \qquad (11)
-$$
+```
 
 With confidence level $ci$ (e.g., 0.95) and $\alpha = 1 - ci$, the two-sided quantile interval is:
 
-$$
-\text{CI}_{m,k}
-=
+```math
+\text{CI}_{m,k}=
 \left[
 Q_{\alpha/2}(S),
 \,
 Q_{1-\alpha/2}(S)
 \right]
 \qquad (12)
-$$
+```
 
-In code, we compute $Q_p$ using `numpy.quantile(diffs, 100*p, method=quantile_method)`,
+In code, we compute $Q_p$ using `numpy.quantile(diffs, p, method=quantile_method)`,
 fixing `quantile_method` for reproducibility.
 
 > Note (interpretation / alternative convention): if `quantile_method="inverted_cdf"`,
@@ -305,12 +304,12 @@ fixing `quantile_method` for reproducibility.
 
 The point estimate (Eq. 7) is always computed when both samples are non-empty, but the CI is computed only if:
 
-$$
+```math
 n_{m,k} \ge n_{\min}
 \ \text{and}\
 n_{b,k} \ge n_{\min}
 \qquad (13)
-$$
+```
 
 where $n_{min}$ is a configured threshold (e.g., `min_group_size_for_ci`).  
 If the gate fails, CI fields are reported as `null` with `reason="insufficient_n"`.

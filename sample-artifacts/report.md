@@ -2,8 +2,19 @@
 
 ## 1. One-line takeaway
 
-- Using **Transit** as the baseline, non-Transit methods show strong selection effects: **Radial Velocity, Imaging, and Microlensing** have much larger **median radii** (Δmedian(pl_rade) ≈ **+10 R⊕**), higher **median masses** (Δmedian(pl_bmasse) ≈ **+340 / +4.1×10³ / +164 M⊕**), and longer **median periods** (Δmedian(pl_orbper) ≈ **+291 days** for RV and **+3.3×10⁴ days** for Imaging; Microlensing pl_orbper n_nonnull is insufficient for CI).
-- **Transit** を基準（baseline）にすると、非 Transit 系の手法（Radial Velocity／Imaging／Microlensing）は、中央値差ベースで **半径が大きい**（Δmedian(pl_rade) ≈ **+10 R⊕**）、**質量が大きい**（Δmedian(pl_bmasse) ≈ **+340 / +4.1×10³ / +164 M⊕**）、**周期が長い**（Δmedian(pl_orbper) は RV ≈ **+291 日**、Imaging ≈ **+3.3×10⁴ 日**；Microlensing はCI閾値に満たず）側に偏っており、検出法ごとの選択バイアス（selection effects）が強く現れている。
+- Using **Transit** as the baseline, non-Transit methods — Radial Velocity (RV), Imaging (Im), and Microlensing (Mi) — show strong selection effects.
+
+  - Median radius: Δmedian(pl_rade) ≈ **+10 R⊕** (all non-Transit methods)
+  - Median mass: Δmedian(pl_bmasse) ≈ **+340** (RV) / **+4.1×10³** (Im) / **+164 M⊕** (Mi)
+  - Median period: Δmedian(pl_orbper) ≈ **+291 days** (RV), **+3.3×10⁴ days** (Im)
+  - Note: Microlensing pl_orbper n_nonnull is insufficient for calculating CI.
+
+- **Transit** を基準 (baseline) にすると, 非 Transit 系の手法 (Radial Velocity (RV), Imaging (Im), Microlensing (Mi)) は, 中央値差ベースで検出法ごとの選択バイアス (selection effects) が強く現れている.
+
+  - Median radius: Δmedian(pl_rade) ≈ **+10 R⊕**（非Transit系全手法）
+  - Median mass: Δmedian(pl_bmasse) ≈ **+340**（RV）/ **+4.1×10³**（Im）/ **+164 M⊕**（Mi）
+  - Median period: Δmedian(pl_orbper) ≈ **+291 days**（RV）, **+3.3×10⁴ days**（Im）
+  - 補足: Microlensing の pl_orbper は CI 算出閾値に満たず欠損.
 
 ## 2. Run metadata
 
