@@ -140,6 +140,7 @@ def run_pipeline(*, root: Path, config_path: Path | None) -> int:
             metrics=list(cfg.metrics),
             method_order=list(cfg.method_order),
             figures_dir=paths.figures_dir,
+            metrics_dict=metrics_dict,
         )
 
         # Outputs (public contract)
