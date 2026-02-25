@@ -42,6 +42,8 @@ def run_pipeline(*, root: Path, config_path: Path | None) -> int:
         schema_hash=schema_hash,
     )
 
+    run.tap = {"used": True}
+
     uv_lock_sha = try_hash_lockfile(paths.root)
     if uv_lock_sha is not None:
         run.outputs["uv_lock_sha256"] = uv_lock_sha
@@ -68,6 +70,7 @@ def run_pipeline(*, root: Path, config_path: Path | None) -> int:
             "format": cfg.tap.fmt,
             "adql": res.adql,
             "url": res.url,
+            "source": "tap",
         }
         run.http = res.http
 

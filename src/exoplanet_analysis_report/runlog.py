@@ -47,6 +47,7 @@ class RunLog:
 
     data_source: dict[str, Any] = field(default_factory=dict)
     http: dict[str, Any] = field(default_factory=dict)
+    tap: dict[str, Any] = field(default_factory=dict)
     snapshots: dict[str, Any] = field(default_factory=dict)
     row_counts: dict[str, Any] = field(default_factory=dict)
     missingness: dict[str, Any] = field(default_factory=dict)
@@ -63,6 +64,7 @@ class RunLog:
             "command": self.command,
             "data_source": self.data_source,
             "http": self.http,
+            "tap": self.tap,
             "filters": {
                 "discoverymethod_in": list(self.cfg.filters.discoverymethod_in)
             },
@@ -103,17 +105,89 @@ class RunLog:
         )
 
 
+def _resolve_gitdir(repo_root: Path) -> Path | None:
+    git_path = repo_root / ".git"
+    if not git_path.exists():
+        return None
+
+    if git_path.is_dir():
+        return git_path
+
+    # Worktree: .git is a file: "gitdir: <path>"
+    try:
+        txt = git_path.read_text(encoding="utf-8", errors="replace").strip()
+    except OSError:
+        return None
+
+    prefix = "gitdir:"
+    if not txt.lower().startswith(prefix):
+        return None
+
+    p = txt[len(prefix) :].strip()
+
+    # If p is absolute, (repo_root / p) becomes p (pathlib behavior).
+    return (repo_root / p).resolve()
+
+
+def _resolve_commondir(gitdir: Path) -> Path:
+    """
+    In a linked worktree, refs usually live under the common git dir.
+    gitdir/commondir contains a path (often relative) to that common dir.
+    """
+    commondir_file = gitdir / "commondir"
+    if not commondir_file.exists():
+        return gitdir
+
+    try:
+        rel = commondir_file.read_text(encoding="utf-8", errors="replace").strip()
+    except OSError:
+        return gitdir
+
+    if not rel:
+        return gitdir
+
+    return (gitdir / rel).resolve()
+
+
 def try_get_git_commit(repo_root: Path) -> str:
-    head = repo_root / ".git" / "HEAD"
-    if not head.exists():
+    repo_root = repo_root.resolve()
+
+    gitdir = _resolve_gitdir(repo_root)
+    if gitdir is None:
         return "UNKNOWN"
-    txt = head.read_text(encoding="utf-8").strip()
-    if txt.startswith("ref: "):
-        ref = txt.replace("ref: ", "").strip()
-        ref_path = repo_root / ".git" / ref
-        if ref_path.exists():
-            return ref_path.read_text(encoding="utf-8").strip()[:7]
-    return txt[:7]
+
+    common_gitdir = _resolve_commondir(gitdir)
+
+    head = gitdir / "HEAD"
+    try:
+        txt = head.read_text(encoding="utf-8", errors="replace").strip()
+    except OSError:
+        return "UNKNOWN"
+
+    if not txt:
+        return "UNKNOWN"
+
+    # Detached HEAD: HEAD contains commit hash
+    if not txt.startswith("ref: "):
+        return txt[:7]
+
+    # Symbolic ref: resolve ref file (try gitdir, then common_gitdir)
+    ref = txt[len("ref: ") :].strip()
+    if not ref:
+        return "UNKNOWN"
+
+    for base in (gitdir, common_gitdir):
+        ref_path = base / ref
+        try:
+            if ref_path.exists():
+                sha = ref_path.read_text(encoding="utf-8", errors="replace").strip()
+                if sha:
+                    return sha[:7]
+        except OSError:
+            return "UNKNOWN"
+
+    # Fast mode: do not scan packed-refs
+    return "UNKNOWN"
 
 
 def try_hash_lockfile(repo_root: Path) -> str | None:

@@ -13,6 +13,19 @@ def _fmt(x: float | None) -> str:
     return f"{x:.4g}"
 
 
+def _fmt_inline(v: str | None) -> str:
+    if not v:
+        return "—"
+    return f"`{v}`"
+
+
+def _fmt_count(x: Any) -> str:
+    """Format a count-like value for human-readable Markdown."""
+    if x is None:
+        return "—"
+    return str(x)
+
+
 def _md_table(headers: list[str], rows: list[list[str]]) -> str:
     head = "| " + " | ".join(headers) + " |"
     sep = "| " + " | ".join(["---"] * len(headers)) + " |"
@@ -25,6 +38,35 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
     lines.append("# Exoplanet Method Comparison Report")
     lines.append("")
 
+    # ---- shared lookups (avoid repetition) ----
+    ds = run.get("data_source") or {}
+    rc = run.get("row_counts") or {}
+    b = run.get("bootstrap") or {}
+    snaps = run.get("snapshots") or {}
+    tap = run.get("tap") or {}
+    outputs = run.get("outputs") or {}
+
+    # Determine execution route.
+    source = ds.get("source")
+    source_norm = source.lower() if isinstance(source, str) else None
+    if source_norm is None:
+        source_norm = "tap" if (ds.get("adql") or ds.get("url")) else "unknown"
+
+    tap_used = tap.get("used")
+    if tap_used is None:
+        tap_used = source_norm == "tap"
+
+    raw_parquet_path = snaps.get("raw_parquet_path")
+    clean_parquet_path = ds.get("clean_parquet_path") or snaps.get("clean_parquet_path")
+    clean_sha256 = snaps.get("clean_sha256")
+
+    warehouse_path = outputs.get("warehouse") or "warehouse/warehouse.duckdb"
+    figures_dir = outputs.get("figures_dir") or "artifacts/figures/"
+
+    method_order = metrics.get("method_order", [])
+    metric_names = list(metrics.get("metrics", {}).keys())
+
+    # ---- 1 ----
     lines.append("## 1. One-line takeaway")
     lines.append("")
     lines.append(
@@ -32,17 +74,17 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
     )
     lines.append("")
 
+    # ---- 2 ----
     lines.append("## 2. Run metadata")
     lines.append("")
     lines.append(f"- Generated (UTC): **{run.get('generated_utc', '')}**")
     lines.append(f"- Git commit: **{run.get('git_commit', '')}**")
-    ds = run.get("data_source", {})
     lines.append(f"- Source table: `{ds.get('table', '')}`")
-    rc = run.get("row_counts", {})
-    lines.append(
-        f"- Rows: raw **{rc.get('raw', '')}** / clean **{rc.get('clean', '')}**"
-    )
-    b = run.get("bootstrap", {})
+
+    raw_s = _fmt_count(rc.get("raw"))
+    clean_s = _fmt_count(rc.get("clean"))
+    lines.append(f"- Rows: raw **{raw_s}** / clean **{clean_s}**")
+
     lines.append(f"- Baseline method: **{b.get('baseline_method', '')}**")
     lines.append(
         f"- Bootstrap: seed **{b.get('seed', '')}**, resamples **{b.get('n_resamples', '')}**, CI **{b.get('ci', '')}**"
@@ -53,9 +95,23 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
     )
     lines.append("")
 
+    # ---- 3 ----
     lines.append("## 3. Data source")
     lines.append("")
-    lines.append("- NASA Exoplanet Archive (TAP)")
+    if tap_used:
+        lines.append("- NASA Exoplanet Archive (TAP)")
+        # Keep high-level details here; full query/URL are in Appendix.
+        if ds.get("tap_mode"):
+            lines.append(f"  - Mode: {_fmt_inline(ds.get('tap_mode'))}")
+        if ds.get("tap_endpoint"):
+            lines.append(f"  - Endpoint: {_fmt_inline(ds.get('tap_endpoint'))}")
+        lines.append("  - Query: see Appendix A/B")
+    else:
+        reason = tap.get("reason") or "offline re-run"
+        lines.append(f"- NASA Exoplanet Archive ({reason})")
+        lines.append(f"  - Input clean parquet: {_fmt_inline(clean_parquet_path)}")
+        lines.append(f"  - Input sha256: {_fmt_inline(clean_sha256)}")
+
     lines.append(
         "- Why `pscomppars`: one row per planet → convenient for method-wise summaries."
     )
@@ -64,12 +120,14 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
     )
     lines.append("")
 
+    # ---- 4 ----
     lines.append("## 4. Data contract")
     lines.append("")
-    snaps = run.get("snapshots", {})
-    lines.append(f"- Raw snapshot: `{snaps.get('raw_parquet_path', '')}`")
-    lines.append(f"- Clean dataset: `{snaps.get('clean_parquet_path', '')}`")
-    lines.append("- Warehouse: `warehouse/warehouse.duckdb`")
+    lines.append(f"- Raw snapshot: {_fmt_inline(raw_parquet_path)}")
+    lines.append(f"- Clean dataset: {_fmt_inline(clean_parquet_path)}")
+    lines.append(f"- Clean sha256: {_fmt_inline(clean_sha256)}")
+    lines.append(f"- Warehouse: `{warehouse_path}`")
+
     cols = run.get("columns", {}).get("used", [])
     if cols:
         lines.append("- Columns used:")
@@ -77,6 +135,7 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
             lines.append(f"  - `{c}`")
     lines.append("")
 
+    # ---- 5 ----
     lines.append("## 5. Cleaning & validation")
     lines.append("")
     lines.append("- Rows are **not dropped** solely because a metric is null.")
@@ -86,11 +145,10 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
     lines.append("- `disc_year` is descriptive only; invalid values become null.")
     lines.append("")
 
+    # ---- 6 ----
     lines.append("## 6. Missingness (per metric × method)")
     lines.append("")
     miss = run.get("missingness", {})
-    method_order = metrics.get("method_order", [])
-    metric_names = list(metrics.get("metrics", {}).keys())
     for k in metric_names:
         rows = []
         for m in method_order:
@@ -112,15 +170,17 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
     lines.append("- Note: missingness may be non-random and can bias comparisons.")
     lines.append("")
 
+    # ---- 7 ----
     lines.append("## 7. Exploratory analysis")
     lines.append("")
-    lines.append("- Figures (see `artifacts/figures/`):")
-    lines.append("  - `figures/method_counts.png`")
-    lines.append("  - `figures/missingness_heatmap.png`")
+    lines.append(f"- Figures (see `{figures_dir}`):")
+    lines.append(f"  - `{figures_dir}method_counts.png`")
+    lines.append(f"  - `{figures_dir}missingness_heatmap.png`")
     for k in metric_names:
-        lines.append(f"  - `figures/{k}_by_method.png`")
+        lines.append(f"  - `{figures_dir}{k}_by_method.png`")
     lines.append("")
 
+    # ---- 8 ----
     lines.append("## 8. Statistical analysis")
     lines.append("")
     lines.append(
@@ -133,6 +193,7 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
     )
     lines.append("")
 
+    # ---- 9 ----
     lines.append("## 9. Results")
     lines.append("")
     lines.append("- Footnotes:")
@@ -185,7 +246,7 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
         diff = block["diff_vs_baseline"]
         d2_rows = []
         for m in method_order:
-            if m == metrics["baseline_method"]:
+            if m == metrics.get("baseline_method"):
                 continue
             dm = diff.get(m, {})
             ci_str = (
@@ -201,6 +262,7 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
         lines.append("---")
         lines.append("")
 
+    # ---- 10 ----
     lines.append("## 10. Interpretation")
     lines.append("")
     lines.append(
@@ -208,6 +270,7 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
     )
     lines.append("")
 
+    # ---- 11 ----
     lines.append("## 11. Limitations")
     lines.append("")
     lines.append(
@@ -219,27 +282,47 @@ def render_report_md(*, run: dict[str, Any], metrics: dict[str, Any]) -> str:
     )
     lines.append("")
 
+    # ---- 12 ----
     lines.append("## 12. How to reproduce")
     lines.append("")
     fence = "`" * 3
     lines.append(f"{fence}bash")
     lines.append("uv sync --locked")
-    lines.append("uv run python scripts/run_pipeline.py")
+    if tap_used:
+        lines.append("uv run python scripts/run_pipeline.py")
+    else:
+        if clean_parquet_path:
+            lines.append(
+                f"uv run python scripts/run_offline.py --clean {clean_parquet_path}"
+            )
+        else:
+            lines.append(
+                "uv run python scripts/run_offline.py --clean <PATH_TO_CLEAN_PARQUET>"
+            )
     lines.append(f"{fence}")
     lines.append("")
 
+    # ---- 13 ----
     lines.append("## 13. Appendix")
     lines.append("")
+
     lines.append("### A. Full ADQL")
     lines.append("")
     lines.append(f"{fence}sql")
-    lines.append(ds.get("adql", ""))
+    if tap_used and ds.get("adql"):
+        lines.append(ds.get("adql", ""))
+    else:
+        lines.append("N/A (offline run)")
     lines.append(f"{fence}")
     lines.append("")
+
     lines.append("### B. TAP sync URL (CSV)")
     lines.append("")
     lines.append(f"{fence}text")
-    lines.append(ds.get("url", ""))
+    if tap_used and ds.get("url"):
+        lines.append(ds.get("url", ""))
+    else:
+        lines.append("N/A (offline run)")
     lines.append(f"{fence}")
     lines.append("")
 
