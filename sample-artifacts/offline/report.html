@@ -9,6 +9,8 @@
         <li>Median period: Δmedian(pl_orbper) ≈ <strong>+291 days</strong> (RV), <strong>+3.3×10⁴ days</strong> (Im)</li>
         Note: Microlensing pl_orbper n_nonnull is insufficient for calculating CI
       </ul>
+    </li>
+    <li>
       <p lang="ja"><strong>Transit</strong> を基準 (baseline) にすると, 非 Transit 系の手法 (Radial Velocity(RV), Imaging(Im), and Microlensing(Mi)) は, 中央値差ベースで検出法ごとの選択バイアス (selection effects) が強く現れている.</p>
       <ul>
         <li>Median radius: Δmedian(pl_rade) ≈ <strong>+10 R⊕</strong>(非Transit全手法)</li>
@@ -20,10 +22,10 @@
 </ul>
 <h2>2. Run metadata</h2>
 <ul>
-<li>Generated (UTC): <strong>2026-02-18T10:38:17Z</strong></li>
-<li>Git commit: <strong>ref: re</strong></li>
+<li>Generated (UTC): <strong>2026-02-25T09:37:24Z</strong></li>
+<li>Git commit: <strong>da8e7f6</strong></li>
 <li>Source table: <code>pscomppars</code></li>
-<li>Rows: raw <strong>6025</strong> / clean <strong>6025</strong></li>
+<li>Rows: raw <strong>—</strong> / clean <strong>6025</strong></li>
 <li>Baseline method: <strong>Transit</strong></li>
 <li>Bootstrap: seed <strong>18790314</strong>, resamples <strong>10000</strong>, CI <strong>0.95</strong>
 <ul>
@@ -34,14 +36,20 @@
 </ul>
 <h2>3. Data source</h2>
 <ul>
-<li>NASA Exoplanet Archive (TAP)</li>
+<li>NASA Exoplanet Archive (offline: input is clean parquet)
+<ul>
+<li>Input clean parquet: <code>data/clean/pscomppars_clean_20260225T093300Z.parquet</code></li>
+<li>Input sha256: <code>sha256:2b17ce3c9c00059d389bded1372f77e7774a213a8fb8e6bf0c072cbe8574eebd</code></li>
+</ul>
+</li>
 <li>Why <code>pscomppars</code>: one row per planet → convenient for method-wise summaries.</li>
 <li>Caveat: <code>pscomppars</code> is a composite table; values may be derived/filled from different references and may be <strong>not self-consistent within a row</strong>.</li>
 </ul>
 <h2>4. Data contract</h2>
 <ul>
-<li>Raw snapshot: <code>data/raw/pscomppars_20260218T103817Z.parquet</code></li>
-<li>Clean dataset: <code>data/clean/pscomppars_clean_20260218T103817Z.parquet</code></li>
+<li>Raw snapshot: —</li>
+<li>Clean dataset: <code>data/clean/pscomppars_clean_20260225T093300Z.parquet</code></li>
+<li>Clean sha256: <code>sha256:2b17ce3c9c00059d389bded1372f77e7774a213a8fb8e6bf0c072cbe8574eebd</code></li>
 <li>Warehouse: <code>warehouse/warehouse.duckdb</code></li>
 <li>Columns used:
 <ul>
@@ -90,11 +98,11 @@
 <ul>
 <li>Figures (see <code>artifacts/figures/</code>):
 <ul>
-<li><code>figures/method_counts.png</code></li>
-<li><code>figures/missingness_heatmap.png</code></li>
-<li><code>figures/pl_rade_by_method.png</code></li>
-<li><code>figures/pl_orbper_by_method.png</code></li>
-<li><code>figures/pl_bmasse_by_method.png</code></li>
+<li><code>artifacts/figures/method_counts.png</code></li>
+<li><code>artifacts/figures/missingness_heatmap.png</code></li>
+<li><code>artifacts/figures/pl_rade_by_method.png</code></li>
+<li><code>artifacts/figures/pl_orbper_by_method.png</code></li>
+<li><code>artifacts/figures/pl_bmasse_by_method.png</code></li>
 </ul>
 </li>
 </ul>
@@ -189,12 +197,12 @@
 </ul>
 <h2>12. How to reproduce</h2>
 <pre><code class="language-bash">uv sync --locked
-uv run python scripts/run_pipeline.py
+uv run python scripts/run_offline.py --clean data/clean/pscomppars_clean_20260225T093300Z.parquet
 </code></pre>
 <h2>13. Appendix</h2>
 <h3>A. Full ADQL</h3>
-<pre><code class="language-sql">select pl_name, discoverymethod, disc_year, pl_rade, pl_orbper, pl_bmasse, pl_bmassprov from pscomppars where discoverymethod in ('Transit', 'Radial Velocity', 'Imaging', 'Microlensing')
+<pre><code class="language-sql">N/A (offline run)
 </code></pre>
 <h3>B. TAP sync URL (CSV)</h3>
-<pre><code class="language-text">https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+pl_name%2C+discoverymethod%2C+disc_year%2C+pl_rade%2C+pl_orbper%2C+pl_bmasse%2C+pl_bmassprov+from+pscomppars+where+discoverymethod+in+%28%27Transit%27%2C+%27Radial+Velocity%27%2C+%27Imaging%27%2C+%27Microlensing%27%29&amp;format=csv
+<pre><code class="language-text">N/A (offline run)
 </code></pre>

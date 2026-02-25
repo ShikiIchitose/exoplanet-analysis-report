@@ -18,10 +18,10 @@
 
 ## 2. Run metadata
 
-- Generated (UTC): **2026-02-18T10:38:17Z**
-- Git commit: **ref: re**
+- Generated (UTC): **2026-02-25T09:37:24Z**
+- Git commit: **da8e7f6**
 - Source table: `pscomppars`
-- Rows: raw **6025** / clean **6025**
+- Rows: raw **—** / clean **6025**
 - Baseline method: **Transit**
 - Bootstrap: seed **18790314**, resamples **10000**, CI **0.95**
   - Quantile method: **linear**
@@ -29,14 +29,17 @@
 
 ## 3. Data source
 
-- NASA Exoplanet Archive (TAP)
+- NASA Exoplanet Archive (offline: input is clean parquet)
+  - Input clean parquet: `data/clean/pscomppars_clean_20260225T093300Z.parquet`
+  - Input sha256: `sha256:2b17ce3c9c00059d389bded1372f77e7774a213a8fb8e6bf0c072cbe8574eebd`
 - Why `pscomppars`: one row per planet → convenient for method-wise summaries.
 - Caveat: `pscomppars` is a composite table; values may be derived/filled from different references and may be **not self-consistent within a row**.
 
 ## 4. Data contract
 
-- Raw snapshot: `data/raw/pscomppars_20260218T103817Z.parquet`
-- Clean dataset: `data/clean/pscomppars_clean_20260218T103817Z.parquet`
+- Raw snapshot: —
+- Clean dataset: `data/clean/pscomppars_clean_20260225T093300Z.parquet`
+- Clean sha256: `sha256:2b17ce3c9c00059d389bded1372f77e7774a213a8fb8e6bf0c072cbe8574eebd`
 - Warehouse: `warehouse/warehouse.duckdb`
 - Columns used:
   - `pl_name`
@@ -87,11 +90,11 @@
 ## 7. Exploratory analysis
 
 - Figures (see `artifacts/figures/`):
-  - `figures/method_counts.png`
-  - `figures/missingness_heatmap.png`
-  - `figures/pl_rade_by_method.png`
-  - `figures/pl_orbper_by_method.png`
-  - `figures/pl_bmasse_by_method.png`
+  - `artifacts/figures/method_counts.png`
+  - `artifacts/figures/missingness_heatmap.png`
+  - `artifacts/figures/pl_rade_by_method.png`
+  - `artifacts/figures/pl_orbper_by_method.png`
+  - `artifacts/figures/pl_bmasse_by_method.png`
 
 ## 8. Statistical analysis
 
@@ -204,7 +207,7 @@
 
 ```bash
 uv sync --locked
-uv run python scripts/run_pipeline.py
+uv run python scripts/run_offline.py --clean data/clean/pscomppars_clean_20260225T093300Z.parquet
 ```
 
 ## 13. Appendix
@@ -212,11 +215,11 @@ uv run python scripts/run_pipeline.py
 ### A. Full ADQL
 
 ```sql
-select pl_name, discoverymethod, disc_year, pl_rade, pl_orbper, pl_bmasse, pl_bmassprov from pscomppars where discoverymethod in ('Transit', 'Radial Velocity', 'Imaging', 'Microlensing')
+N/A (offline run)
 ```
 
 ### B. TAP sync URL (CSV)
 
 ```text
-https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+pl_name%2C+discoverymethod%2C+disc_year%2C+pl_rade%2C+pl_orbper%2C+pl_bmasse%2C+pl_bmassprov+from+pscomppars+where+discoverymethod+in+%28%27Transit%27%2C+%27Radial+Velocity%27%2C+%27Imaging%27%2C+%27Microlensing%27%29&format=csv
+N/A (offline run)
 ```

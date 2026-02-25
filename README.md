@@ -29,7 +29,7 @@ After a successful run, you should expect:
 
 ```text
 artifacts/
-  figures/                # PNG plots (counts / missingness / distributions)
+  figures/                # PNG plots (counts / missingness / distributions / diff CI)
   metrics.json             # machine-readable analysis outputs (public contract)
   run.json                 # run metadata (public contract)
   report.md                # human-facing report (Markdown)
@@ -39,6 +39,28 @@ data/
   clean/                   # clean dataset (Parquet)
 warehouse/
   warehouse.duckdb         # DuckDB file containing the clean table
+
+sample-artifacts/
+  tap/                     # committed sample outputs from a TAP run (demo only)
+    metrics.json
+    run.json
+    report.md
+    report.html
+  offline/                 # committed sample outputs from an offline run (same clean Parquet; demo only)
+    metrics.json
+    run.json
+    report.md
+    report.html
+```
+
+`sample-artifacts/` contains curated sample outputs for quick review and comparison (TAP vs offline) without running the pipeline.
+It is independent of the runtime outputs under `artifacts/`.
+
+### Quick compare (sample outputs)
+
+```bash
+diff -u sample-artifacts/tap/metrics.json sample-artifacts/offline/metrics.json || true
+diff -u sample-artifacts/tap/run.json sample-artifacts/offline/run.json || true
 ```
 
 ### Key design choices (why this pipeline is “honest”)
@@ -69,6 +91,19 @@ uv sync --locked
 uv run python scripts/run_pipeline.py
 ```
 
+### Run offline (from an existing clean Parquet)
+
+Use this when you already have a clean snapshot under `data/clean/` and want to re-run analysis/report generation **without fetching from TAP**.
+
+```bash
+uv run python scripts/run_offline.py --clean data/clean/<clean_snapshot>.parquet
+```
+
+Notes:
+
+- This does not perform any network access; it uses the provided clean Parquet as input.
+- Outputs (`artifacts/*`, `warehouse/warehouse.duckdb`) are regenerated under the repository root.
+
 ### Run the pipeline (with a TOML config override)
 
 ```bash
@@ -90,6 +125,7 @@ Notes:
 - Mode: `sync` (synchronous)
 - Output format: `csv` (then converted to Parquet)
 - Per-run provenance (timestamp, ADQL, URL) is recorded in `artifacts/run.json`.
+- Offline runs do not fetch from TAP; `artifacts/run.json` records `data_source.source: "clean_parquet"` and `tap.used: false`.
 
 ### Table choice
 
@@ -171,7 +207,7 @@ Let:
 
 - $m$ be a discovery method, and $b$ be the baseline method.
 - For a given metric $k$, let the observed (non-null) samples be:
-  
+
 ```math
   x_{m,k} = \{x_{m,k,1}, \dots, x_{m,k,n_{m,k}}\}
   \qquad (1)
