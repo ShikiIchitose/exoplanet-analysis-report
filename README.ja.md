@@ -27,7 +27,7 @@ NASA Exoplanet Archive の **TAP(Table Access Protocol: 表アクセスプロト
 
 ```text
 artifacts/
-  figures/                # PNG 図（counts / missingness / distributions）
+  figures/                # PNG 図（counts / missingness / distributions / diff CI）
   metrics.json             # 機械可読な分析出力（public contract）
   run.json                 # 実行メタデータ（public contract）
   report.md                # 人間向けレポート（Markdown）
@@ -37,6 +37,28 @@ data/
   clean/                   # clean データセット（Parquet）
 warehouse/
   warehouse.duckdb         # clean テーブルを格納した DuckDB ファイル
+
+sample-artifacts/
+  tap/                     # サンプル用の生成物 (TAP利用時)
+    metrics.json
+    run.json
+    report.md
+    report.html
+  offline/                 # サンプル用の生成物 (オフライン実行時)
+    metrics.json
+    run.json
+    report.md
+    report.html
+```
+
+`sample-artifacts/` には、パイプラインを実行しなくても内容を素早く確認できるように、レビュー用・比較用（TAP 実行版とオフライン実行版）のサンプル出力を厳選して収録しています。  
+これらは実行時に生成される `artifacts/` 配下の出力とは独立したものです。
+
+### 簡易比較 (sample outputs)
+
+```bash
+diff -u sample-artifacts/tap/metrics.json sample-artifacts/offline/metrics.json || true
+diff -u sample-artifacts/tap/run.json sample-artifacts/offline/run.json || true
 ```
 
 ### 「誠実な集計」になるための設計（重要）
@@ -67,6 +89,19 @@ uv sync --locked
 uv run python scripts/run_pipeline.py
 ```
 
+### 既存の clean Parquet からオフライン実行
+
+`data/clean/` 配下にある clean スナップショットをすでに持っていて、**TAP からの取得を行わずに**解析・レポート生成を再実行したい場合に利用可能です。
+
+```bash
+uv run python scripts/run_offline.py --clean data/clean/<clean_snapshot>.parquet
+```
+
+注意:
+
+- これはネットワークアクセスを行いません。指定した clean Parquet を入力として使用します。
+- 出力（`artifacts/*`, `warehouse/warehouse.duckdb`）はリポジトリ root 配下で再生成されます。
+
 ### パイプライン実行（TOMLで上書き）
 
 ```bash
@@ -88,6 +123,7 @@ uv run python scripts/run_pipeline.py --config config.toml
 - モード: `sync`（同期）
 - 出力形式: `csv`（その後 Parquet に変換）
 - 実行ごとの provenance（取得時刻、ADQL、URL）は `artifacts/run.json` に記録します。
+- オフライン実行では TAP から取得しません。`artifacts/run.json` に `data_source.source: "clean_parquet"` と `tap.used: false` が記録されます。
 
 ### Table choice
 

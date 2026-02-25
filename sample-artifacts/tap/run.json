@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-02-18T10:38:17Z",
-  "git_commit": "ref: re",
+  "generated_utc": "2026-02-25T09:33:00Z",
+  "git_commit": "da8e7f6",
   "python": {
     "version": "3.13.12"
   },
@@ -12,12 +12,16 @@
     "tap_mode": "sync",
     "format": "csv",
     "adql": "select pl_name, discoverymethod, disc_year, pl_rade, pl_orbper, pl_bmasse, pl_bmassprov from pscomppars where discoverymethod in ('Transit', 'Radial Velocity', 'Imaging', 'Microlensing')",
-    "url": "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+pl_name%2C+discoverymethod%2C+disc_year%2C+pl_rade%2C+pl_orbper%2C+pl_bmasse%2C+pl_bmassprov+from+pscomppars+where+discoverymethod+in+%28%27Transit%27%2C+%27Radial+Velocity%27%2C+%27Imaging%27%2C+%27Microlensing%27%29&format=csv"
+    "url": "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+pl_name%2C+discoverymethod%2C+disc_year%2C+pl_rade%2C+pl_orbper%2C+pl_bmasse%2C+pl_bmassprov+from+pscomppars+where+discoverymethod+in+%28%27Transit%27%2C+%27Radial+Velocity%27%2C+%27Imaging%27%2C+%27Microlensing%27%29&format=csv",
+    "source": "tap"
   },
   "http": {
     "status": 200,
     "content_type": "text/plain; charset=UTF-8",
     "response_bytes": 488846
+  },
+  "tap": {
+    "used": true
   },
   "filters": {
     "discoverymethod_in": [
@@ -53,9 +57,9 @@
     "std_ddof": 1
   },
   "snapshots": {
-    "raw_parquet_path": "data/raw/pscomppars_20260218T103817Z.parquet",
+    "raw_parquet_path": "data/raw/pscomppars_20260225T093300Z.parquet",
     "raw_sha256": "sha256:6765b10a2011b758985957db8c8b973cb5cc921d378307b64eec69d002c5e84b",
-    "clean_parquet_path": "data/clean/pscomppars_clean_20260218T103817Z.parquet",
+    "clean_parquet_path": "data/clean/pscomppars_clean_20260225T093300Z.parquet",
     "clean_sha256": "sha256:2b17ce3c9c00059d389bded1372f77e7774a213a8fb8e6bf0c072cbe8574eebd"
   },
   "missingness": {
